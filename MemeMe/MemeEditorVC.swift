@@ -35,22 +35,8 @@ class MemeEditorVC: UIViewController {
     }
     
     func configureVC() {
-        self.topTextField.delegate    = self
-        self.bottomTextField.delegate = self
-        
-        let memeTextAttributes: [NSAttributedString.Key: Any] = [
-            NSAttributedString.Key.strokeColor: UIColor.black,
-            NSAttributedString.Key.foregroundColor: UIColor.white,
-            NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-            NSAttributedString.Key.strokeWidth: -6.5
-        ]
-        
-        self.topTextField.defaultTextAttributes    = memeTextAttributes
-        self.bottomTextField.defaultTextAttributes = memeTextAttributes
-        
-        self.topTextField.textAlignment    = .center
-        self.bottomTextField.textAlignment = .center
-        
+        self.setupTextField(self.topTextField, text: "TOP")
+        self.setupTextField(self.bottomTextField, text: "BOTTOM")
         self.cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         self.resetMeme()
     }
@@ -71,17 +57,36 @@ class MemeEditorVC: UIViewController {
                         bottomText: bottomTextField.text!,
                         originalImage: imageView.image!,
                         memedImage: self.generateMemedImage())
-        
         UIImageWriteToSavedPhotosAlbum(meme.memedImage, nil, nil, nil);
     }
         
     func resetMeme() {
         DispatchQueue.main.async {
-            self.imageView.image      = nil
-            self.topTextField.text    = "TOP"
-            self.bottomTextField.text = "BOTTOM"
+            self.imageView.image = nil
+            self.setupTextField(self.topTextField, text: "TOP")
+            self.setupTextField(self.bottomTextField, text: "BOTTOM")
             self.canShare()
         }
+    }
+    
+    func setupTextField(_ textField: UITextField, text: String) {
+        textField.text          = text
+        textField.delegate      = self
+        
+        let memeTextAttributes: [NSAttributedString.Key: Any] = [
+            .strokeColor: UIColor.black,
+            .foregroundColor: UIColor.white,
+            .font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            .strokeWidth: -6.5
+        ]
+    
+        textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = .center
+    }
+    
+    func hideAndShowBars(_ value: Bool) {
+        self.toolBar.isHidden = value
+        self.navigationController?.navigationBar.isHidden = value
     }
     
     //MARK: Get Current UITextField
@@ -94,12 +99,12 @@ class MemeEditorVC: UIViewController {
     }
     
     func generateMemedImage() -> UIImage {
-        self.toolBar.isHidden = true
+        self.hideAndShowBars(true)
         UIGraphicsBeginImageContext(self.view.frame.size)
         view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
         let memedImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
-        self.toolBar.isHidden = false
+        self.hideAndShowBars(false)
         return memedImage
     }
     
@@ -166,7 +171,7 @@ extension MemeEditorVC: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         DispatchQueue.main.async {
             if let text = textField.text, text.isEmpty {
-                textField.text = textField.tag == 0 ? "TOP" : "BOTTOM"
+                self.setupTextField(textField, text: textField.tag == 0 ? "TOP" : "BOTTOM")
             }
         }
     }
