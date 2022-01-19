@@ -20,6 +20,7 @@ class SentMemesCollectionViewCell: UICollectionViewCell {
     }
     
     //MARK: - CollectionView Methods
+
     func configureCell(with meme: Meme) {
         DispatchQueue.main.async {
             self.memedImageView.image = meme.memedImage

@@ -18,6 +18,7 @@ class MemeEditorVC: UIViewController {
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     
+    @IBOutlet weak var imageViewHeightConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +35,11 @@ class MemeEditorVC: UIViewController {
         unsubscribeFromKeyboardNotifications()
     }
     
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        self.adaptMemeImageView()
+     }
+    
     func configureVC() {
         self.tabBarController?.tabBar.isHidden = true
         self.setupTextField(self.topTextField, text: "TOP")
@@ -41,6 +47,23 @@ class MemeEditorVC: UIViewController {
         self.cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         self.resetMeme()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+    }
+    
+    func adaptMemeImageView() {
+        DispatchQueue.main.async {
+            self.imageView.contentMode = .scaleAspectFit
+            self.imageViewHeightConstraint.constant = self.isLandscape() ? self.view.frame.size.height - self.toolBar.frame.size.height : 300
+        }
+    }
+    
+    func isLandscape() -> Bool {
+        var isLandscape = false
+        switch UIDevice.current.orientation {
+        case .landscapeRight, .landscapeLeft: isLandscape = true
+        case .portrait: isLandscape = false
+        default: isLandscape = true
+        }
+        return isLandscape
     }
     
     func canShare() {
@@ -61,7 +84,8 @@ class MemeEditorVC: UIViewController {
                             originalImage: imageView.image,
                             memedImage: memedImage)
             (UIApplication.shared.delegate as! AppDelegate).memes.append(meme)
-            UIImageWriteToSavedPhotosAlbum(memedImage, nil, nil, nil);
+            #warning("REMEMBER UNCOMMENT THE NEXT LINE")
+            //UIImageWriteToSavedPhotosAlbum(memedImage, nil, nil, nil);
         }
     }
         
@@ -75,8 +99,8 @@ class MemeEditorVC: UIViewController {
     }
     
     func setupTextField(_ textField: UITextField, text: String) {
-        textField.text          = text
-        textField.delegate      = self
+        textField.text     = text
+        textField.delegate = self
         
         let memeTextAttributes: [NSAttributedString.Key: Any] = [
             .strokeColor: UIColor.black,
@@ -136,7 +160,7 @@ class MemeEditorVC: UIViewController {
     func getKeyboardHeight(_ notification: Notification) -> CGFloat {
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue
-        return keyboardSize.cgRectValue.height
+        return self.isLandscape() ? keyboardSize.cgRectValue.height : keyboardSize.cgRectValue.height / 2
     }
 
     
@@ -146,7 +170,9 @@ class MemeEditorVC: UIViewController {
         let imagePickerVC = UIImagePickerController()
         imagePickerVC.delegate   = self
         imagePickerVC.sourceType = sender.tag == 0 ? .photoLibrary : .camera
-        DispatchQueue.main.async { self.present(imagePickerVC, animated: true, completion: nil) }
+        DispatchQueue.main.async {
+            self.present(imagePickerVC, animated: true, completion: nil)
+        }
     }
     
     @IBAction func onShareButtonTap(_ sender: UIBarButtonItem) {

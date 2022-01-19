@@ -11,7 +11,10 @@ import UIKit
 class SentMemesCollectionVC: UICollectionViewController {
     
     // MARK: - Properties
-    let padding: CGFloat = 20
+    let space: CGFloat = 3.0
+    let padding: CGFloat = 20.0
+    let cellHeight: CGFloat = 150
+    var cellWith: CGFloat { return (self.view.frame.size.width - (2 * space)) / 3.0 }
     
     var memes: [Meme]! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -20,13 +23,14 @@ class SentMemesCollectionVC: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureVC()
-        self.configureFlowLayout()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        DispatchQueue.main.async { self.tabBarController?.tabBar.isHidden = false }
+        DispatchQueue.main.async {
+            self.configureFlowLayout()
+            self.tabBarController?.tabBar.isHidden = false
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -34,33 +38,17 @@ class SentMemesCollectionVC: UICollectionViewController {
         self.reloadData()
     }
     
-    //MARK: - Screen Orientation
-//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-//        super.viewWillTransition(to: size, with: coordinator)
-//        //self.configureVC()
-//        //self.reloadData()
-//        
-//        print(UIDevice.current.orientation.isPortrait ? 10.0 : 50.0, "esta portrait: ", UIDevice.current.orientation.isPortrait)
-//    }
-    
-    
-    func configureVC() {
-        DispatchQueue.main.async {
-            self.collectionView.contentInset = UIEdgeInsets(top: self.padding, left: self.padding, bottom: self.padding, right: self.padding)
-        }
-    }
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        self.configureFlowLayout()
+     }
     
     func configureFlowLayout() {
         DispatchQueue.main.async {
-            let space: CGFloat = 3.0
-            let dimension = ((self.view.frame.size.width - (2 * space)) - (self.padding * 2)) / 3.0
-            
             let layout = UICollectionViewFlowLayout()
-            layout.itemSize = CGSize(width: dimension, height: 150)
-            
-            layout.minimumLineSpacing = space
-            layout.minimumInteritemSpacing = space
-        
+            layout.itemSize = CGSize(width: self.cellWith, height: self.cellHeight)
+            layout.minimumLineSpacing = self.space
+            layout.minimumInteritemSpacing = self.space
             self.collectionView.collectionViewLayout = layout
         }
     }
@@ -69,13 +57,6 @@ class SentMemesCollectionVC: UICollectionViewController {
         DispatchQueue.main.async { self.collectionView.reloadData() }
     }
 
-    
-    // MARK: - Navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
-    }
-
-    
     // MARK: UICollectionViewDataSource
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -95,7 +76,17 @@ class SentMemesCollectionVC: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         
+        let memeDetailVC = storyboard?.instantiateViewController(withIdentifier: MemeDetailVC.identifier) as! MemeDetailVC
+        let meme = self.memes[indexPath.row]
+        memeDetailVC.meme = meme
+        
+        self.navigationController?.pushViewController(memeDetailVC, animated: true)
     }
 
 }
 
+extension SentMemesCollectionVC: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: self.cellWith, height: self.cellHeight)
+    }
+}
