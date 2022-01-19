@@ -28,14 +28,10 @@ class SentMemesCollectionVC: UICollectionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         DispatchQueue.main.async {
+            self.reloadData()
             self.configureFlowLayout()
             self.tabBarController?.tabBar.isHidden = false
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.reloadData()
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -75,11 +71,9 @@ class SentMemesCollectionVC: UICollectionViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        
         let memeDetailVC = storyboard?.instantiateViewController(withIdentifier: MemeDetailVC.identifier) as! MemeDetailVC
         let meme = self.memes[indexPath.row]
         memeDetailVC.meme = meme
-        
         self.navigationController?.pushViewController(memeDetailVC, animated: true)
     }
 

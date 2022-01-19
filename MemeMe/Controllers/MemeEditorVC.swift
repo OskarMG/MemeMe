@@ -78,14 +78,13 @@ class MemeEditorVC: UIViewController {
     }
     
     func save() {
-        if let memedImage = self.generateMemedImage() {
-            let meme = Meme(topText: topTextField.text!,
-                            bottomText: bottomTextField.text!,
+        if let memedImage = self.generateMemedImage(), let topText = topTextField.text, let bottomText = bottomTextField.text {
+            let meme = Meme(topText: topText,
+                            bottomText: bottomText,
                             originalImage: imageView.image,
                             memedImage: memedImage)
             (UIApplication.shared.delegate as! AppDelegate).memes.append(meme)
-            #warning("REMEMBER UNCOMMENT THE NEXT LINE")
-            //UIImageWriteToSavedPhotosAlbum(memedImage, nil, nil, nil);
+            UIImageWriteToSavedPhotosAlbum(memedImage, nil, nil, nil);
         }
     }
         

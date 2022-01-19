@@ -17,7 +17,7 @@ class SentMemesTableVC: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureTableView()
+        self.configureTableView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -33,7 +33,6 @@ class SentMemesTableVC: UITableViewController {
     }
 
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -44,23 +43,17 @@ class SentMemesTableVC: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SentMemesTableViewCell.identifier, for: indexPath) as! SentMemesTableViewCell
-        
         let meme = self.memes[indexPath.row]
         cell.configureCell(with: meme)
-
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.tableView.deselectRow(at: indexPath, animated: true)
-        
         let memeDetailVC = storyboard?.instantiateViewController(withIdentifier: MemeDetailVC.identifier) as! MemeDetailVC
         let meme = self.memes[indexPath.row]
         memeDetailVC.meme = meme
-        
         self.navigationController?.pushViewController(memeDetailVC, animated: true)
-        
     }
-
 
 }
