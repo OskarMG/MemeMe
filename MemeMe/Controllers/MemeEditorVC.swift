@@ -35,10 +35,12 @@ class MemeEditorVC: UIViewController {
     }
     
     func configureVC() {
+        self.tabBarController?.tabBar.isHidden = true
         self.setupTextField(self.topTextField, text: "TOP")
         self.setupTextField(self.bottomTextField, text: "BOTTOM")
         self.cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         self.resetMeme()
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
     func canShare() {
@@ -53,11 +55,14 @@ class MemeEditorVC: UIViewController {
     }
     
     func save() {
-        let meme = Meme(topText: topTextField.text!,
-                        bottomText: bottomTextField.text!,
-                        originalImage: imageView.image!,
-                        memedImage: self.generateMemedImage())
-        UIImageWriteToSavedPhotosAlbum(meme.memedImage, nil, nil, nil);
+        if let memedImage = self.generateMemedImage() {
+            let meme = Meme(topText: topTextField.text!,
+                            bottomText: bottomTextField.text!,
+                            originalImage: imageView.image,
+                            memedImage: memedImage)
+            (UIApplication.shared.delegate as! AppDelegate).memes.append(meme)
+            UIImageWriteToSavedPhotosAlbum(memedImage, nil, nil, nil);
+        }
     }
         
     func resetMeme() {
@@ -98,11 +103,11 @@ class MemeEditorVC: UIViewController {
         return nil
     }
     
-    func generateMemedImage() -> UIImage {
+    func generateMemedImage() -> UIImage? {
         self.hideAndShowBars(true)
         UIGraphicsBeginImageContext(self.view.frame.size)
         view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
-        let memedImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        let memedImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         self.hideAndShowBars(false)
         return memedImage
@@ -147,12 +152,13 @@ class MemeEditorVC: UIViewController {
     @IBAction func onShareButtonTap(_ sender: UIBarButtonItem) {
         self.dismissKeyboard()
         DispatchQueue.main.async {
-            let activityVC = UIActivityViewController(activityItems: [self.generateMemedImage()], applicationActivities: nil)
-            activityVC.completionWithItemsHandler = {(activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
-                if completed { self.save() }
+            if let memedImage = self.generateMemedImage() {
+                let activityVC = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+                activityVC.completionWithItemsHandler = {(activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
+                    if completed { self.save() }
+                }
+                self.present(activityVC, animated: true, completion: nil)
             }
-            
-            self.present(activityVC, animated: true, completion: nil)
         }
     }
     
