@@ -39,13 +39,23 @@ class SentMemesCollectionVC: UICollectionViewController {
         self.configureFlowLayout()
      }
     
+    func createThreeColumnFlowLayout(in view: UIView) -> UICollectionViewFlowLayout {
+        let width                       = view.bounds.width
+        let padding: CGFloat            = 12
+        let minimunItemSpace: CGFloat   = 10
+        let availableWidth              = width - (padding * 2) - (minimunItemSpace * 2)
+        let itemWidth                   = availableWidth / 3
+        
+        let flowLayout                  = UICollectionViewFlowLayout()
+        flowLayout.sectionInset         = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
+        flowLayout.itemSize             = CGSize(width: itemWidth, height: itemWidth + 40)
+        
+        return flowLayout
+    }
+    
     func configureFlowLayout() {
         DispatchQueue.main.async {
-            let layout = UICollectionViewFlowLayout()
-            layout.itemSize = CGSize(width: self.cellWith, height: self.cellHeight)
-            layout.minimumLineSpacing = self.space
-            layout.minimumInteritemSpacing = self.space
-            self.collectionView.collectionViewLayout = layout
+            self.collectionView.collectionViewLayout = self.createThreeColumnFlowLayout(in: self.view)
         }
     }
     
@@ -80,7 +90,7 @@ class SentMemesCollectionVC: UICollectionViewController {
 }
 
 extension SentMemesCollectionVC: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.cellWith, height: self.cellHeight)
-    }
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        return CGSize(width: self.cellWith, height: self.cellHeight)
+//    }
 }
